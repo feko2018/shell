@@ -1,0 +1,52 @@
+01.
+【题目要求】
+请按照这样的日期格式（xxxx-xx-xx）每日生成一个文件，
+例如生成的文件名为2019-08-08.log， 
+并且把磁盘的使用情况写到/var/log/disk/2019-08-08.log中，
+不用考虑cron，仅仅写脚本即可
+
+02.
+有日志1.log，部分内容如下
+```
+112.111.12.248 – [25/Sep/2013:16:08:31 +0800]formula-x.haotui.com “/seccode.php?update=0.5593110133088248″ 200″http://formula-x.haotui.com/registerbbs.php” “Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1;)”
+61.147.76.51 – [25/Sep/2013:16:08:31 +0800]xyzdiy.5d6d.com “/attachment.php?aid=4554&k=9ce51e2c376bc861603c7689d97c04a1&t=1334564048&fid=9&sid=zgohwYoLZq2qPW233ZIRsJiUeu22XqE8f49jY9mouRSoE71″ 301″http://xyzdiy.5d6d.com/thread-1435-1-23.html” “Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)”
+```
+统计出每个IP访问量有多少
+
+03.
+写一个脚本计算一下linux系统所有进程占用常驻内存大小的和。
+
+04.
+设计一个脚本，监控远程的一台机器(假设ip为10.0.0.20)的存活状态，当发现宕机时发一封邮件给你自己
+
+05.
+找到/abc目录下所有后缀名为.txt的文件
+ 1. 批量修改.txt为.txt.bak
+ 2. 把所有.bak文件打包压缩为abc.tar.gz
+ 3. 批量还原文件的名字，即把增加的.bak再删除
+
+06.
+写一个脚本，判断本机的80端口（假如服务为httpd）是否开启着，如果开启着什么都不做，如果发现端口不存在，那么重启一下httpd服务，
+并发邮件通知你自己。脚本写好后，可以每一分钟执行一次，也可以写一个死循环的脚本，30s检测一次。
+
+07.
+设计一个shell脚本来备份数据库，首先在本地服务器上保存一份数据，然后再远程拷贝一份，本地保存一周的数据，远程保存一个月。
+
+假定，我们知道mysql root账号的密码，要备份的库为wordpress，本地备份目录为/backup/mysql, 远程服务器ip为10.0.0.10，
+远程提供了一个rsync服务，备份的地址是 10.0.0.10::backup  . 写完脚本后，需要加入到cron中，每天凌晨3点执行。
+0 3  * * bash /server/scripts/07.sh &>/dev/null
+
+08.
+服务器上跑的是LNMP环境，近期总是有502现象。502为网站访问的状态码，200正常，502错误是nginx最为普遍的错误状态码。
+由于502只是暂时的，并且只要一重启php-fpm服务则502消失，但不重启的话，则会一直持续很长时间。
+所以有必要写一个监控脚本，监控访问日志的状态码，一旦发生502，则自动重启一下php-fpm。
+我们设定：
+1）access_log  /data/log/access.log
+2）脚本死循环，每10s检测一次（假设每10s钟的日志条数为300左右）
+3）重启php-fpm的方法是  /etc/init.d/php-fpm restart
+
+09.
+把一个文本文档的前5行中包含字母的行删除掉，同时把6到10行中的全部字母删除掉。
+10.
+用shell打印下面这句话中字母数小于6的单词。
+Bash also interprets a number of multi-character options.

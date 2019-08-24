@@ -1,0 +1,161 @@
+01.
+#!/bin/bash
+. /etc/init.d/functions
+dir=/var/log/disk
+[ ! -d $dir ] && mkdir $dir -p
+df -h > $dir/$(date +%F).log
+
+02.
+#!/bin/bash
+. /etc/init.d/functions
+awk '{print $1}' 1.log |sort|uniq -c |sort -rn
+#awk '{a[$1]++}END{for (ip in a) print a[ip],ip}' 1.log |sort -nr
+03.
+#!/bin/bash
+. /etc/init.d/functions
+sum=0
+for n in `ps aux|grep -v USER|awk '{print $6}'`
+do
+sum=$[$sum+$n]
+done
+echo $sum
+04.
+#!/bin/bash
+. /etc/init.d/functions
+ip=10.0.0.20
+loss_status=`ping -c 3 -w 3 $ip|grep "packet loss"|awk -F "[,% ]+" '{print $6}'`
+
+
+[ "`echo $ip |sed 's#[0-9]##g'`" != "..." ] && {
+echo "mail $ip 脚本ip地址有错"
+exit 2
+}
+chk(){
+if [ ${loss_status} -eq 100 ];then
+        echo "mail $ip 宕机了"
+elif [ ${loss_status} -eq 0 ];then
+        echo "$ip 在线" &>/dev/null
+else
+        echo "mail $ip 丢包率比较高，丢包率为${loss_status}"
+fi
+}
+
+main(){
+while true
+do
+        chk
+        sleep 10
+done
+}
+
+main
+
+05.
+#!/bin/bash
+. /etc/init.d/functions
+cd /abc 
+ls *.txt  &>/dev/null
+if [ $? -eq 0 ];then
+        rename txt txt.bak *.txt
+#find /abc  -type f  -name "*.txt.bak"|xargs -i mv {} {}.bak
+##find /abc  -type f  -name "*.txt"|awk '{print "mv",$1,$1".bak"}'|bash
+else
+        echo "not found *.txt"
+exit 2
+fi
+ls *.bak  &>/dev/null
+if [ $? -eq 0 ];then
+        tar czf abc.tar.gz *.bak
+        rm *.bak -f
+else
+        echo "not found *.bak"
+        exit 2
+fi
+
+ls abc.tar.gz &>/dev/null
+if [ $? -eq 0 ];then
+        tar xf abc.tar.gz 
+         rename txt.bak txt *.txt.bak
+else
+        echo "not foud  abc.tar.gz"
+        exit 2
+fi
+
+06.
+#!/bin/bash
+. /etc/init.d/functions
+chk(){
+if [ `ss -lntup|grep "\b80\b"|wc -l` -eq 0 ];then
+        systemctl  restart httpd
+fi
+}
+main(){
+while true
+do 
+        chk
+        sleep 30
+done
+}
+main
+
+07.
+#!/bin/bash
+. /etc/init.d/functions
+remote_ip=10.0.0.10
+bakdir=/backup/mysql
+[ `ss -lntup|grep "\b3306\b"|wc -l` -eq 0 ]&&{
+echo "mail mysql is down"
+exit 2
+}
+[ ! -d $bakdir ]&& mkdir -p $bakdir
+cd $bakdir
+mysqldump -uroot -p123456 -B wordpress -x | gzip >wordpress_$(date +%F).sql.gz
+rsync -avz  wordpress_$(date +%F).sql.gz rsync_backup@${remote_ip}::backup  --password-file=/etc/rsync.password
+##############
+find $bakdir -type f -name "*.sql.gz" -mtime +7 | xargs rm -f
+08.
+#!/bin/bash
+. /etc/init.d/functions
+logfile=/data/log/access.log
+[ ! -f $logfile ]&&{
+echo "not found $logfile"
+exit 2
+}
+chk(){
+if [ `grep "/b502/b" $logfile|wc -l`-gt 0 ];then
+/etc/init.d/php-fpm restart
+fi
+}
+main(){
+while true 
+do 
+        chk
+        sleep 10
+done
+}
+main
+09.
+#!/bin/bash
+#author:feko
+#version:0.1
+#description：...
+. /etc/init.d/functions
+del_line=`cat -n a.txt |sed -n '1,5p'|sed  -n '/[a-zA-Z]/p'|awk '{print $1}'`
+sed -r -i '6,10s#[a-zA-Z]##g' a.txt
+for i in ${del_line}
+do
+sed -i "${i}d" a.txt
+done
+10.
+#!/bin/bash
+#author:feko
+#version:0.1
+#description：用shell打印下面这句话中字母数小于6的单词。
+. /etc/init.d/functions
+world=`echo "Bash also interprets a number of multi-character options."|tr " " "\n"|awk -F "[ .]+" '{print $1}'`
+for i in $world
+do 
+if [ `echo "$i" |wc -c` -lt 6 ];then
+        echo "$i"
+fi
+done
