@@ -1,2 +1,5 @@
 100shell脚本经典训练题
 实战环境：CentOS Linux release 7.6.1810 (Core)    3.10.0-957.el7.x86_64
+结构：
+shell-Question  问题
+shell-answer    答案
