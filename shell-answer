@@ -159,3 +159,49 @@ if [ `echo "$i" |wc -c` -lt 6 ];then
         echo "$i"
 fi
 done
+11.
+#!/bin/bash
+. /etc/init.d/functions
+
+chk(){
+read -e -p "please input 1-4 number：" arg
+case  $arg in
+        1)
+        date
+        ;;
+        2)
+        ls
+        ;;
+        3)
+        who
+        ;;
+        4)
+        pwd
+        ;;
+        *)
+        break
+        ;;
+esac
+}
+main(){
+while true
+do
+        chk
+        sleep 3
+done
+}
+main
+12.
+#!/bin/bash
+. /etc/init.d/functions
+
+for i in `seq 0 1 9`
+do
+id user_0$i
+if [ $? -ne 0 ];then
+        useradd user_0$i
+        password=`mkpasswd -l 10`
+        echo "user_0$i $password">>/var/log/mkpasswd.log
+        echo "$password"|passwd --stdin user_0$i
+fi
+done
