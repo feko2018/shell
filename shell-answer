@@ -205,3 +205,117 @@ if [ $? -ne 0 ];then
         echo "$password"|passwd --stdin user_0$i
 fi
 done
+13.
+#!/bin/bash
+#author:feko
+#version1.0
+#description：采用了函数，分模块来实现
+. /etc/init.d/functions
+#变量定义
+##pg=`ps -C httpd --no-headers|wc -l`
+pg=`pgrep  httpd|wc -l`
+rehttp="systemctl restart http"
+RETVAL=0
+RETVAL1=0
+RETVAL2=10
+
+#默认10秒检查一次，判断进程数大于500，则返回8，小于则返回4
+chk(){
+        sleep $1
+if [ $pg -gt 500 ];then
+                RETVAL=8
+        else
+                RETVAL=4
+fi
+}
+#判断重启是否成功，成功返回8失败返回4
+judge_rehttp(){
+if  [ $RETVAL -eq 8 ];then
+        $rehttp
+        [ $? -eq 0 ]&&RETVAL1=8||RETVAL1=4
+fi
+}
+
+#重启失败则走这条路
+restart_failure(){
+if [ $RETVAL1 -eq 4 ];then
+        for i in `seq 6`
+        do
+        if [ $RETVAL1 -eq 8 ];then
+                break
+        elif [ $RETVAL1 -eq 4 ];then
+                judge_rehttp
+        fi
+        done
+        [ $i -eq 6 ]&&{
+        echo "mail  admin htptd restart is failure"
+        exit 2
+        }
+fi
+}
+#重启成功则走这条路
+restart_success(){
+if [ $RETVAL1 -eq 8 ];then
+        RETVAL2=60
+        chk $RETVAL2
+        if [ $RETVAL -eq 8 ];then
+                echo "mail httpd pg is $pg"
+                exit 3
+        else
+                RETVAL2=10
+        fi
+fi
+}
+#主函数
+main(){
+while true
+do
+        chk $RETVAL2
+        judge_rehttp
+        restart_failure
+        restart_success
+done
+}
+main
+14.
+#!/bin/bash
+##description：防止恶意攻击
+. /etc/init.d/functions
+
+t1=`date +%Y:%H:%M`
+logfile=/data/logs/access_log
+ban_ip(){
+egrep "$t1:[0-9]+" $logfile > /tmp/tmp_last_min.log
+awk '{n[$1]++}END{for (i in n) print n[i],i}' /tmp/tmp_last_min.log |sort -nr |awk '$1>100{print $2}'>/tmp/bad_ip.log
+n=`cat /tmp/bad_ip.log|wc  -l`
+if [ $n -ne 0 ];then
+        for ip in `cat /tmp/bad_ip.log`
+    do
+        if [ `iptables -nvL |grep $ip|wc -l` -eq 0 ];then
+        iptables -I INPUT -s $ip -j REJECT
+        fi
+    done
+fi
+}
+pass_ip(){
+#pkts #计数器 
+##iptables -Z 清空这些计数器 
+iptables -nvL INPUT|sed '1,2d' |awk '$1<5 {print $8}' > /tmp/good_ip.list
+n=`cat /tmp/good_ip.log|wc  -l`
+    if [ $n -ne 0 ]
+    then
+    for ip in `cat /tmp/good_ip.log`
+    do
+        iptables -D INPUT -s $ip -j REJECT
+    done
+    fi
+    iptables -Z
+}
+t=`date +%M`
+if [ "$t" = "00" ] || [ "$t" = "30" ];then
+   pass_ip
+   ban_ip
+else
+   ban_ip
+fi
+
