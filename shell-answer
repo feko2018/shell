@@ -318,4 +318,30 @@ if [ "$t" = "00" ] || [ "$t" = "30" ];then
 else
    ban_ip
 fi
+15.
+#!/bin/bash
+. /etc/init.d/functions
+
+a=10
+b=150
+n=0
+echo -n "10 "
+for ((a;a<b;n++))
+do
+tmp=$[2**n]
+a=$[a+20+tmp]
+echo -n "$a "
+done
+echo 
+16.
+#!/bin/bash
+. /etc/init.d/functions
+users_file=/tmp/users_file
+awk -F: '{if($3>=1000) print $1,$3}' /etc/passwd>${users_file}
+if [ -s ${users_file} ];then
+n=`wc -l ${users_file}|awk  '{print $1}'`
+        echo "有${n}普通用户"
+else
+        echo "没有普通用户"
+fi
 

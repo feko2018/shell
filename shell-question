@@ -75,3 +75,12 @@ Bash also interprets a number of multi-character options.
  1. 一分钟内请求量高于100次的IP视为不正常请求。
  2. 访问日志路径为/data/logs/access_log。
 用第2例中的1.log作为演示日志
+15.
+请仔细查看如下几个数字的规律，并使用shell脚本输出后面的十个数字。
+
+10 31 53 77  105 141 …….
+16.
+写个shell，看看你的Linux系统中是否有自定义用户（普通用户），若是有，一共有几个？
+
+
+
